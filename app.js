@@ -1,0 +1,293 @@
+/* 周易·习易 — 交互逻辑 */
+'use strict';
+
+/* ---------- 工具 ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const randInt = n => Math.floor(Math.random() * n);
+function sample(arr, k) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1);[a[i], a[j]] = [a[j], a[i]]; }
+  return a.slice(0, k);
+}
+/* 由 6 爻（自下而上）生成卦象 HTML；渲染时自上而下 */
+function hexHTML(array, small) {
+  let html = '<div class="hex' + (small ? ' sm' : '') + '">';
+  for (let i = array.length - 1; i >= 0; i--) {
+    if (array[i] === 1) html += '<div class="ln"></div>';
+    else html += '<div class="ln yin"><i></i><i></i></div>';
+  }
+  return html + '</div>';
+}
+
+/* 检索表：卦象键(自下而上) -> 卦 */
+const byKey = {};
+HEXAGRAMS.forEach(h => { byKey[h.array.join('')] = h; });
+
+/* ---------- 视图切换 ---------- */
+function showView(name) {
+  $$('.view').forEach(v => v.classList.remove('active'));
+  $('#view-' + name).classList.add('active');
+  $$('nav.main a').forEach(a => a.classList.toggle('active', a.dataset.view === name));
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { /* 某些环境不支持 */ }
+}
+
+/* ---------- 首页卦序歌（带拼音） ---------- */
+let showPinyin = true;
+function renderHome() {
+  renderGeSong();
+  const t = $('#ge-py-toggle');
+  if (t) t.textContent = showPinyin ? '隐藏拼音' : '显示拼音';
+}
+function renderGeSong() {
+  const box = $('#ge-content');
+  if (!box) return;
+  const py = (typeof GE_PINYIN !== 'undefined') ? GE_PINYIN : {};
+  box.innerHTML = GUA_XU_GE.map(line => {
+    let html = '';
+    for (const ch of line) {
+      const p = py[ch];
+      if (p && showPinyin) html += `<ruby>${ch}<rt>${p}</rt></ruby>`;
+      else html += ch;
+    }
+    return `<div class="ge-line">${html}</div>`;
+  }).join('');
+}
+function togglePinyin() {
+  showPinyin = !showPinyin;
+  renderGeSong();
+  const t = $('#ge-py-toggle');
+  if (t) t.textContent = showPinyin ? '隐藏拼音' : '显示拼音';
+}
+
+/* ---------- 六十四卦总览 ---------- */
+function renderOverview() {
+  const grid = $('#overview-grid');
+  grid.innerHTML = HEXAGRAMS.map(h =>
+    `<div class="card" data-id="${h.id}">
+       <div class="seq">${String(h.id).padStart(2, '0')}</div>
+       ${hexHTML(h.array, true)}
+       <div class="nm">${h.name}</div>
+       <div class="tt">${h.title}</div>
+     </div>`).join('');
+  $$('#overview-grid .card').forEach(c =>
+    c.addEventListener('click', () => openDetail(+c.dataset.id)));
+}
+
+/* ---------- 卦详情 ---------- */
+function openDetail(id) {
+  const h = HEXAGRAMS.find(x => x.id === id);
+  if (!h) return;
+  $('#detail-body').innerHTML = `
+    <div class="detail-head">
+      <div class="big">${hexHTML(h.array)}</div>
+      <div class="detail-meta">
+        <h2>${h.name}</h2>
+        <div class="tt">${h.title} · 第 ${String(h.id).padStart(2, '0')} 卦</div>
+        <div class="tags">
+          <span>上卦 ${h.upper}（${h.upperNature}）</span>
+          <span>下卦 ${h.lower}（${h.lowerNature}）</span>
+          <span>${h.symbol}</span>
+        </div>
+      </div>
+    </div>
+    <div class="judge">
+      <h3>卦辞</h3>
+      <div class="txt">${h.judgment}</div>
+    </div>
+    <div class="yaoci">
+      <h3>爻辞</h3>
+      ${h.lines.map(l => `<div class="yl"><div class="yn">${l.name}</div><div class="yt">${l.text}</div></div>`).join('')}
+    </div>`;
+  showView('detail');
+}
+
+/* ---------- 背诵 ---------- */
+const quiz = { mode: 'see-diagram', score: 0, total: 0, cur: null, answered: false };
+function startQuiz(mode) {
+  quiz.mode = mode; quiz.score = 0; quiz.total = 0; quiz.answered = false;
+  $$('.quiz-set button').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+  nextQuestion();
+}
+function nextQuestion() {
+  quiz.answered = false; quiz.cur = sample(HEXAGRAMS, 1)[0];
+  const q = $('#quiz-card'), fb = $('#quiz-feedback');
+  fb.textContent = ''; fb.className = 'feedback';
+  const h = quiz.cur;
+  if (quiz.mode === 'see-diagram') {
+    const opts = sample(HEXAGRAMS.filter(x => x.id !== h.id), 3).concat(h);
+    const sh = sample(opts, 4);
+    q.innerHTML = `<div class="qhint">看卦象，选出正确的卦名</div>
+      <div class="qhex">${hexHTML(h.array)}</div>
+      <div class="choices">${sh.map((o, i) =>
+        `<button class="choice" data-correct="${o.id === h.id}"><span class="opt">${'ABCD'[i]}</span>${o.name}（${o.title}）</button>`).join('')}</div>`;
+    bindChoices(q, h);
+  } else if (quiz.mode === 'see-name') {
+    const opts = sample(HEXAGRAMS.filter(x => x.id !== h.id), 3).concat(h);
+    const sh = sample(opts, 4);
+    q.innerHTML = `<div class="qhint">看卦名，选出对应的卦象（仅看图形，不显示卦名）</div>
+      <div class="qname">${h.name}</div>
+      <div class="choices">${sh.map((o, i) =>
+        `<button class="choice" data-correct="${o.id === h.id}"><span class="opt">${'ABCD'[i]}</span>${hexHTML(o.array, true)}</button>`).join('')}</div>`;
+    bindChoices(q, h);
+  } else if (quiz.mode === 'type-name') {
+    q.innerHTML = `<div class="qhint">看卦象，写出卦名（可填单名如「屯」或全称「水雷屯」）</div>
+      <div class="qhex">${hexHTML(h.array)}</div>
+      <div class="choices" style="grid-template-columns:1fr">
+        <input class="qinput" id="quiz-input" placeholder="在此输入卦名" autocomplete="off">
+      </div>
+      <div class="qactions"><button id="quiz-submit">提交</button></div>`;
+    const submit = () => {
+      if (quiz.answered) return;
+      const v = $('#quiz-input').value.trim();
+      const ok = v === h.name || v === h.title;
+      resolveAnswer(ok, `正确答案：${h.name}（${h.title}）`);
+    };
+    $('#quiz-submit').addEventListener('click', submit);
+    $('#quiz-input').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+    setTimeout(() => $('#quiz-input') && $('#quiz-input').focus(), 50);
+  } else if (quiz.mode === 'type-seq') {
+    q.innerHTML = `<div class="qhint">看卦名，写出它在《周易》中的卦序（1–64）</div>
+      <div class="qname">${h.name}</div>
+      <div class="choices" style="grid-template-columns:1fr">
+        <input class="qinput" id="quiz-input" placeholder="如 3" autocomplete="off">
+      </div>
+      <div class="qactions"><button id="quiz-submit">提交</button></div>`;
+    const submit = () => {
+      if (quiz.answered) return;
+      const v = parseInt($('#quiz-input').value.trim(), 10);
+      const ok = v === h.id;
+      resolveAnswer(ok, `正确答案：第 ${h.id} 卦（${h.title}）`);
+    };
+    $('#quiz-submit').addEventListener('click', submit);
+    $('#quiz-input').addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+    setTimeout(() => $('#quiz-input') && $('#quiz-input').focus(), 50);
+  }
+  updateScore();
+}
+function bindChoices(q, h) {
+  $$('.choice', q).forEach(b => b.addEventListener('click', () => {
+    if (quiz.answered) return;
+    const correct = b.dataset.correct === 'true';
+    $$('.choice', q).forEach(c => {
+      if (c.dataset.correct === 'true') c.classList.add('correct');
+      else if (c === b) c.classList.add('wrong');
+    });
+    resolveAnswer(correct, `正确答案：${h.name}（${h.title}）`);
+  }));
+}
+function resolveAnswer(ok, msg) {
+  quiz.answered = true; quiz.total++;
+  if (ok) quiz.score++;
+  const fb = $('#quiz-feedback');
+  fb.textContent = (ok ? '✓ 答对了！' : '✗ ' + msg);
+  fb.className = 'feedback ' + (ok ? 'ok' : 'no');
+  updateScore();
+  if (!$('#quiz-next')) {
+    const btn = document.createElement('button');
+    btn.id = 'quiz-next'; btn.textContent = '下一题 →';
+    btn.style.cssText = 'margin-top:16px;background:var(--red);color:#fff;border:none;padding:10px 26px;border-radius:9px;cursor:pointer;font-family:inherit;font-size:16px;letter-spacing:2px;';
+    btn.addEventListener('click', nextQuestion);
+    $('#quiz-card').appendChild(btn);
+  }
+}
+function updateScore() {
+  $('#quiz-score').textContent = quiz.score;
+  $('#quiz-total').textContent = quiz.total;
+}
+
+/* ---------- 占卦 ---------- */
+let casting = false;
+function castLine() {
+  // 三枚铜钱：正(字)=1, 反(背)=0
+  const coins = [randInt(2), randInt(2), randInt(2)];
+  const heads = coins.reduce((a, b) => a + b, 0);
+  const val = heads === 3 ? 9 : heads === 2 ? 7 : heads === 1 ? 8 : 6; // 9老阳 7少阳 8少阴 6老阴
+  return { coins, val };
+}
+async function doCast() {
+  if (casting) return; casting = true;
+  $('#cast-btn').disabled = true;
+  const lines = [];
+  for (let i = 0; i < 6; i++) lines.push(castLine());
+  // 渲染硬币（逐爻揭示）
+  const coinsBox = $('#coins-box');
+  coinsBox.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:14px;justify-content:center;margin:6px 0;font-size:22px;';
+    const lbl = document.createElement('span');
+    lbl.style.cssText = 'color:var(--ink-faint);width:46px;text-align:right;font-size:14px;';
+    lbl.textContent = '第' + '初二三四五上'[i] + '爻';
+    row.appendChild(lbl);
+    const cs = document.createElement('span');
+    cs.style.cssText = 'display:flex;gap:8px;';
+    lines[i].coins.forEach(c => {
+      const s = document.createElement('span');
+      s.className = 'coin flip';
+      s.textContent = c ? '正' : '反';
+      s.style.cssText = 'display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;border:1px solid var(--gold);' +
+        (c ? 'background:#f7e9c9;color:var(--red);' : 'background:var(--paper);color:var(--ink-soft);');
+      cs.appendChild(s);
+    });
+    const v = document.createElement('span');
+    v.style.cssText = 'color:var(--ink-soft);width:40px;font-size:13px;';
+    v.textContent = lines[i].val === 9 ? '老阳○' : lines[i].val === 7 ? '少阳—' : lines[i].val === 8 ? '少阴--' : '老阴×';
+    row.appendChild(cs); row.appendChild(v);
+    coinsBox.appendChild(row);
+    await new Promise(r => setTimeout(r, 180));
+  }
+  // 计算本卦 / 变卦 / 动爻 / 互卦
+  const ben = lines.map(l => (l.val === 9 || l.val === 7) ? 1 : 0);
+  const benHex = byKey[ben.join('')];
+  const bian = ben.map((b, i) => lines[i].val === 9 ? 0 : lines[i].val === 6 ? 1 : b);
+  const bianHex = byKey[bian.join('')];
+  const dong = lines.map((l, i) => (l.val === 9 || l.val === 6) ? i : -1).filter(i => i >= 0);
+  // 互卦：下=二三四爻，上=三四五爻
+  const hu = [ben[1], ben[2], ben[3], ben[2], ben[3], ben[4]];
+  const huHex = byKey[hu.join('')];
+
+  // 渲染结果
+  let rh = `<div class="rh"><div class="lbl">本卦</div><div class="big">${hexHTML(ben)}</div><div class="nm">${benHex.name}（${benHex.title}）</div></div>`;
+  if (dong.length) {
+    rh += `<div class="rh"><div class="lbl">变卦</div><div class="big">${hexHTML(bian)}</div><div class="nm">${bianHex.name}（${bianHex.title}）</div></div>`;
+    rh += `<div class="rh"><div class="lbl">互卦</div><div class="big">${hexHTML(hu)}</div><div class="nm">${huHex.name}（${huHex.title}）</div></div>`;
+  }
+  $('#result-hex').innerHTML = rh;
+
+  // 断语
+  let duan = `<div class="duan"><div class="dt">本卦·${benHex.name} 卦辞</div><div class="dd">${benHex.judgment}</div></div>`;
+  if (dong.length) {
+    dong.forEach(i => {
+      const ln = benHex.lines[i];
+      duan += `<div class="duan"><div class="dt">本卦·${ln.name}（动爻）</div><div class="dd">${ln.text}</div></div>`;
+    });
+    if (bianHex.id !== benHex.id)
+      duan += `<div class="duan"><div class="dt">之卦·${bianHex.name} 卦辞（变后所之）</div><div class="dd">${bianHex.judgment}</div></div>`;
+    duan += `<div class="dylist">动爻：${dong.map(i => '第' + '初二三四五上'[i] + '爻').join('、')}</div>`;
+  } else {
+    duan += `<div class="dylist">无动爻（六爻皆静），以本卦卦辞断之。</div>`;
+  }
+  $('#result-duan').innerHTML = duan;
+  $('#result-box').style.display = 'block';
+  casting = false; $('#cast-btn').disabled = false;
+}
+
+/* ---------- 教程 ---------- */
+function renderTutorial() {
+  // 静态内容已在 HTML 中；此处留空
+}
+
+/* ---------- 初始化 ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  renderHome();
+  renderOverview();
+  $$('nav.main a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showView(a.dataset.view); }));
+  $('#detail-back').addEventListener('click', () => showView('overview'));
+  // 背诵
+  $$('.quiz-set button').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.mode)));
+  startQuiz('see-diagram');
+  // 占卦
+  $('#cast-btn').addEventListener('click', doCast);
+  showView('home');
+});
