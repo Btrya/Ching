@@ -1,0 +1,250 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+    color: #2b2620;
+    background:
+      radial-gradient(circle at 20% 10%, #f7f0dd 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #f1e6cb 0%, transparent 50%),
+      #f4ecd8;
+    background-attachment: fixed;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+  a { color: #9e2b25; }
+}
+
+@layer components {
+  /* 视图切换 */
+  .view { @apply hidden py-8 pb-20; }
+  .view.active { @apply block; animation: fade .25s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* 顶栏 */
+  .topbar {
+    @apply sticky top-0 z-50 bg-paper/90 backdrop-blur border-b border-rule;
+  }
+  .topbar-inner { @apply flex items-center gap-[18px] h-[62px] max-w-wrap mx-auto px-5; }
+  .brand { @apply font-kai font-bold text-2xl text-cinnabar tracking-[4px] no-underline whitespace-nowrap; }
+  .brand small { @apply text-[13px] text-ink-faint tracking-normal ml-1.5; }
+  nav.main { @apply ml-auto flex gap-1 flex-wrap; }
+  .nav-link {
+    @apply no-underline text-ink-soft text-[15px] px-3 py-1.5 rounded-lg tracking-wide border border-transparent transition;
+  }
+  .nav-link:hover { @apply text-cinnabar bg-paper-2; }
+  .nav-link.active { @apply text-white bg-cinnabar border-cinnabar; }
+
+  /* 首页 hero */
+  .hero { @apply text-center pt-8 pb-2; }
+  .hero h1 {
+    @apply font-kai text-[52px] m-0 text-ink tracking-[14px];
+    text-indent: 14px;
+  }
+  .hero .sub { @apply text-ink-soft text-[17px] tracking-[2px] mt-2.5; }
+  .seal {
+    @apply inline-block mt-4 text-white bg-cinnabar font-kai text-[15px] px-3.5 py-1.5 rounded-md tracking-[3px] shadow-soft;
+    transform: rotate(-2deg);
+  }
+
+  /* 功能卡 */
+  .features { @apply grid grid-cols-1 md:grid-cols-3 gap-[18px] mt-9; }
+  .feature { @apply bg-paper-2 border border-rule rounded-xl p-5 shadow-soft; }
+  .feature .ico { @apply text-[30px]; }
+  .feature h3 { @apply mt-2 mb-1.5 text-[19px] text-cinnabar tracking-wide; }
+  .feature p { @apply m-0 text-ink-soft text-[14px]; }
+
+  /* 卦序歌 */
+  .ge-block { @apply mt-10 bg-paper-2 border border-rule rounded-xl p-6 shadow-soft; }
+  .ge-head { @apply flex items-center justify-between gap-3 mb-1.5; }
+  .ge-block h2 { @apply m-0 text-cinnabar tracking-[2px]; }
+  .mini-btn {
+    @apply bg-paper border border-rule text-ink-soft font-song text-[13px] px-3.5 py-1 rounded-full cursor-pointer transition whitespace-nowrap;
+  }
+  .mini-btn:hover { @apply bg-cinnabar text-white border-cinnabar; }
+  .ge-block .note { @apply text-ink-faint text-[13px] mt-0 mb-3.5; }
+  .ge-lines { @apply text-[22px] tracking-[3px] leading-[2.4] font-kai; }
+  .ge-lines .ge-line { @apply my-0.5; }
+  .ge-lines ruby { ruby-position: over; text-align: center; }
+  .ge-lines rt {
+    font-size: 12px; color: #9e2b25; letter-spacing: 0;
+    font-family: -apple-system, "PingFang SC", sans-serif; font-weight: 400;
+  }
+
+  /* 通用区块标题 */
+  .section-title { @apply font-kai text-[30px] text-ink tracking-[4px] m-0 mb-1; }
+  .section-sub { @apply text-ink-faint text-[14px] m-0 mb-[22px]; }
+
+  /* 六十四卦总览 */
+  .grid-64 { @apply grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-3; }
+  .card {
+    @apply bg-paper-2 border border-rule rounded-xl p-3 text-center cursor-pointer transition shadow-[0_2px_8px_rgba(43,38,32,0.18)];
+  }
+  .card:hover { @apply -translate-y-0.5 border-cinnabar shadow-[0_6px_16px_rgba(43,38,32,0.18)]; }
+  .card .seq { @apply text-[12px] text-ink-faint; }
+  .card .nm { @apply font-kai text-[19px] text-ink mt-1 mb-1.5 tracking-wide; }
+  .card .tt { @apply text-[11px] text-ink-soft; }
+
+  /* 卦象爻线 */
+  .hex { display: inline-flex; flex-direction: column; gap: 5px; align-items: center; }
+  .hex .ln { width: 60px; height: 10px; border-radius: 2px; background: #2b2620; }
+  .hex .ln.yin { display: flex; justify-content: space-between; background: transparent; }
+  .hex .ln.yin i { display: block; height: 10px; width: 42%; background: #2b2620; border-radius: 2px; }
+  .hex.sm .ln { height: 6px; width: 34px !important; }
+  .hex.sm .ln.yin i { height: 6px; }
+  .qhex .hex .ln { width: 78px; height: 13px; }
+  .qhex .hex .ln.yin i { height: 13px; }
+  .choice .hex.sm .ln { width: 50px; height: 9px; }
+  .choice .hex.sm .ln.yin i { height: 9px; }
+  .detail-big .hex .ln { width: 84px; height: 12px; }
+  .detail-big .hex .ln.yin i { height: 12px; }
+  .rh-big .hex .ln { width: 70px; height: 11px; }
+  .rh-big .hex .ln.yin i { height: 11px; }
+
+  /* 卦详情 */
+  .detail-back button {
+    @apply bg-paper-2 border border-rule text-ink-soft py-1.5 px-4 rounded-lg cursor-pointer font-song text-[14px];
+  }
+  .detail-back button:hover { @apply text-cinnabar border-cinnabar; }
+  .detail-head {
+    @apply flex gap-8 items-start flex-wrap bg-paper-2 border border-rule rounded-2xl p-7 shadow-soft;
+  }
+  .detail-meta h2 { @apply font-kai text-[38px] m-0 tracking-[4px]; }
+  .detail-meta .tt { @apply text-cinnabar-soft text-[16px] my-0.5 tracking-[2px]; }
+  .detail-meta .tags span {
+    @apply inline-block bg-paper-3 border border-rule rounded-full py-0.5 px-3 text-[13px] text-ink-soft mr-1.5 mb-1.5;
+  }
+  .judge { @apply mt-7 bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
+  .judge h3, .yaoci h3 { @apply m-0 mb-2.5 text-cinnabar tracking-[2px] text-xl; }
+  .judge .txt { @apply text-[17px] leading-loose; }
+  .yaoci { @apply mt-6; }
+  .yl { @apply flex gap-3.5 py-3 border-t border-dashed border-rule; }
+  .yl:first-of-type { @apply border-t-0; }
+  .yl .yn { @apply font-kai font-bold text-cinnabar min-w-[64px] text-[17px]; }
+  .yl .yt { @apply text-[16px] leading-[1.9]; }
+
+  /* 背诵 */
+  .quiz-set { @apply flex gap-2.5 flex-wrap mb-4; }
+  .quiz-set button {
+    @apply bg-paper-2 border border-rule text-ink-soft py-2 px-4 rounded-lg cursor-pointer font-song text-[14px];
+  }
+  .quiz-set button.on { @apply bg-cinnabar text-white border-cinnabar; }
+  .quiz-set button:hover { @apply border-cinnabar; }
+  .scorebar { @apply flex gap-4 items-center text-ink-soft text-[15px] mb-3.5; }
+  .scorebar b { @apply text-cinnabar text-xl; }
+  .qcard { @apply bg-paper-2 border border-rule rounded-2xl p-7 shadow-soft text-center; }
+  .qcard .qhint { @apply text-ink-faint text-[14px] mb-3.5; }
+  .qcard .qname { @apply font-kai text-[34px] tracking-[3px] mb-2.5; }
+  .qcard .qhex { @apply my-2.5 mb-[18px]; }
+  .choices { @apply grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-[520px] mx-auto; }
+  .choice {
+    @apply bg-paper border border-rule rounded-xl p-3.5 cursor-pointer font-song text-[17px] text-ink transition;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .choice:hover { @apply border-cinnabar; }
+  .choice.correct { @apply bg-[#dfe9d4] border-[#7a9a52] text-[#3c5a22]; }
+  .choice.wrong { @apply bg-[#f0d9d4] border-[#b8472f] text-[#8a2b1d]; }
+  .choice .opt { @apply font-bold text-ink-faint; }
+  .qinput {
+    @apply font-song text-xl text-center py-2.5 px-3.5 w-[200px] border border-rule rounded-lg bg-paper text-ink;
+  }
+  .qactions { @apply mt-4; }
+  .qactions button {
+    @apply bg-cinnabar text-white border-none py-2.5 px-6 rounded-lg cursor-pointer font-song text-[16px] tracking-[2px];
+  }
+  .qactions button.ghost { @apply bg-paper-2 text-ink-soft border border-rule; }
+  .feedback { @apply mt-4 text-[16px] min-h-[24px]; }
+  .feedback.ok { @apply text-[#3c5a22]; }
+  .feedback.no { @apply text-[#8a2b1d]; }
+
+  /* 核心背诵内容一览 */
+  .core-block { @apply mt-12; }
+  .core-scroll { @apply overflow-x-auto; -webkit-overflow-scrolling: touch; }
+  .core-table {
+    @apply w-full border-collapse bg-paper-2 border border-rule rounded-xl overflow-hidden shadow-soft text-[15px] min-w-[600px];
+  }
+  .core-table th, .core-table td {
+    @apply border-b border-r border-rule p-3.5 align-top text-left;
+  }
+  .core-table th { @apply bg-cinnabar text-white font-normal tracking-wide text-[14px]; }
+  .core-table tr:last-child td { @apply border-b-0; }
+  .core-table td:last-child, .core-table th:last-child { @apply border-r-0; }
+  .core-table td:first-child {
+    @apply font-kai text-[17px] text-ink font-semibold w-[140px] whitespace-nowrap;
+  }
+  .core-table .song { @apply font-kai leading-[1.9] text-ink; }
+  .core-table .scene { @apply text-ink-soft text-[14px] leading-[1.7]; }
+  .core-table .sub2 { @apply font-song text-[12px] text-ink-faint font-normal; }
+  .core-table .mini-tip { @apply inline-block mt-1 font-song text-[12px] text-cinnabar; }
+  .core-table tbody tr:nth-child(even) td { @apply bg-paper; }
+
+  /* 占卦 */
+  .divine-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-[22px] items-start; }
+  .panel { @apply bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
+  .panel h3 { @apply m-0 mb-3 text-cinnabar tracking-[2px] text-xl; }
+  .cast-btn {
+    @apply bg-cinnabar text-white border-none py-3 px-8 rounded-xl cursor-pointer font-song text-[17px] tracking-[3px];
+  }
+  .cast-btn:disabled { @apply opacity-60 cursor-default; }
+  .coins { @apply flex flex-col gap-1.5 justify-center my-4 text-[22px] min-h-[44px]; }
+  .coin { @apply transition; }
+  .coin.flip { animation: flip .5s ease; }
+  @keyframes flip {
+    0% { transform: rotateY(0) scale(1); }
+    50% { transform: rotateY(180deg) scale(1.2); }
+    100% { transform: rotateY(360deg) scale(1); }
+  }
+  .result-hex { @apply flex gap-6 justify-center flex-wrap mt-2; }
+  .rh { @apply text-center; }
+  .rh .lbl { @apply font-kai text-[16px] text-cinnabar mb-2 tracking-[2px]; }
+  .rh .nm { @apply text-[14px] text-ink-soft mt-2; }
+  .dylist { @apply mt-3.5 text-ink-soft text-[14px]; }
+  .duan { @apply border-t border-dashed border-rule py-3.5; }
+  .duan .dt { @apply font-kai text-cinnabar font-bold text-[16px]; }
+  .duan .dd { @apply text-[15px] leading-[1.9] mt-1; }
+  .tutorial h4 { @apply text-ink text-[17px] my-4 tracking-wide; }
+  .tutorial ol, .tutorial ul { @apply pl-[22px] text-ink-soft text-[15px]; }
+  .tutorial li { @apply my-1.5; }
+  .tutorial .tip {
+    @apply bg-paper-3 border-l-4 border-gold py-2.5 px-3.5 rounded-md text-ink-soft text-[14px] my-3;
+  }
+
+  /* 关于 */
+  .about p { @apply text-[16px] text-ink-soft leading-loose; }
+  .about .disc {
+    @apply bg-paper-3 border border-rule rounded-xl p-4 text-ink-soft text-[14px] mt-4;
+  }
+
+  footer { @apply text-center text-ink-faint text-[13px] py-10 border-t border-rule mt-8; }
+}
+
+/* ---------- 移动端微调（窄屏 hex / 卦序歌 / 导航） ---------- */
+@media (max-width: 820px) {
+  .topbar-inner { @apply flex-wrap h-auto py-2; }
+  .brand { @apply text-xl; }
+  nav.main { @apply ml-0 w-full flex-nowrap overflow-x-auto gap-0.5 pb-0.5; }
+  .nav-link { @apply px-2.5 py-1.5 text-[14px] whitespace-nowrap; }
+  .ge-lines { font-size: 18px; letter-spacing: 2px; }
+  .core-table { min-width: 600px; }
+  .core-table td:first-child { @apply w-[120px]; }
+}
+@media (max-width: 560px) {
+  .hero h1 { font-size: 32px; letter-spacing: 4px; text-indent: 4px; }
+  .hero .sub { @apply text-[15px]; }
+  .ge-lines { font-size: 16px; letter-spacing: 1px; }
+  .ge-lines rt { font-size: 11px; }
+  .section-title { font-size: 24px; letter-spacing: 2px; }
+  .qhex .hex .ln { width: 64px; height: 11px; }
+  .qhex .hex .ln.yin i { height: 11px; }
+  .qcard { @apply p-[22px]; }
+  .qcard .qname { @apply text-[28px]; }
+  .detail-head { @apply gap-4 p-4; }
+  .detail-meta h2 { @apply text-[30px]; }
+  .judge, .yaoci { @apply p-4; }
+  .panel { @apply p-4; }
+  .rh-big .hex .ln { width: 58px; height: 9px; }
+  .rh-big .hex .ln.yin i { height: 9px; }
+}

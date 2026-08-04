@@ -1,5 +1,6 @@
-/* 周易·习易 — 交互逻辑 */
-'use strict';
+/* 周易·习易 — 交互逻辑（ES Module） */
+import './styles/main.css';
+import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN } from './data/hexagrams.js';
 
 /* ---------- 工具 ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -42,11 +43,10 @@ function renderHome() {
 function renderGeSong() {
   const box = $('#ge-content');
   if (!box) return;
-  const py = (typeof GE_PINYIN !== 'undefined') ? GE_PINYIN : {};
   box.innerHTML = GUA_XU_GE.map(line => {
     let html = '';
     for (const ch of line) {
-      const p = py[ch];
+      const p = GE_PINYIN[ch];
       if (p && showPinyin) html += `<ruby>${ch}<rt>${p}</rt></ruby>`;
       else html += ch;
     }
@@ -80,7 +80,7 @@ function openDetail(id) {
   if (!h) return;
   $('#detail-body').innerHTML = `
     <div class="detail-head">
-      <div class="big">${hexHTML(h.array)}</div>
+      <div class="detail-big">${hexHTML(h.array)}</div>
       <div class="detail-meta">
         <h2>${h.name}</h2>
         <div class="tt">${h.title} · 第 ${String(h.id).padStart(2, '0')} 卦</div>
@@ -186,7 +186,7 @@ function resolveAnswer(ok, msg) {
   if (!$('#quiz-next')) {
     const btn = document.createElement('button');
     btn.id = 'quiz-next'; btn.textContent = '下一题 →';
-    btn.style.cssText = 'margin-top:16px;background:var(--red);color:#fff;border:none;padding:10px 26px;border-radius:9px;cursor:pointer;font-family:inherit;font-size:16px;letter-spacing:2px;';
+    btn.style.cssText = 'margin-top:16px;background:#9e2b25;color:#fff;border:none;padding:10px 26px;border-radius:9px;cursor:pointer;font-family:inherit;font-size:16px;letter-spacing:2px;';
     btn.addEventListener('click', nextQuestion);
     $('#quiz-card').appendChild(btn);
   }
@@ -217,7 +217,7 @@ async function doCast() {
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:14px;justify-content:center;margin:6px 0;font-size:22px;';
     const lbl = document.createElement('span');
-    lbl.style.cssText = 'color:var(--ink-faint);width:46px;text-align:right;font-size:14px;';
+    lbl.style.cssText = 'color:#8a7c69;width:46px;text-align:right;font-size:14px;';
     lbl.textContent = '第' + '初二三四五上'[i] + '爻';
     row.appendChild(lbl);
     const cs = document.createElement('span');
@@ -226,12 +226,12 @@ async function doCast() {
       const s = document.createElement('span');
       s.className = 'coin flip';
       s.textContent = c ? '正' : '反';
-      s.style.cssText = 'display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;border:1px solid var(--gold);' +
-        (c ? 'background:#f7e9c9;color:var(--red);' : 'background:var(--paper);color:var(--ink-soft);');
+      s.style.cssText = 'display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;border:1px solid #b08d57;' +
+        (c ? 'background:#f7e9c9;color:#9e2b25;' : 'background:#f4ecd8;color:#5b5147;');
       cs.appendChild(s);
     });
     const v = document.createElement('span');
-    v.style.cssText = 'color:var(--ink-soft);width:40px;font-size:13px;';
+    v.style.cssText = 'color:#5b5147;width:40px;font-size:13px;';
     v.textContent = lines[i].val === 9 ? '老阳○' : lines[i].val === 7 ? '少阳—' : lines[i].val === 8 ? '少阴--' : '老阴×';
     row.appendChild(cs); row.appendChild(v);
     coinsBox.appendChild(row);
@@ -248,10 +248,10 @@ async function doCast() {
   const huHex = byKey[hu.join('')];
 
   // 渲染结果
-  let rh = `<div class="rh"><div class="lbl">本卦</div><div class="big">${hexHTML(ben)}</div><div class="nm">${benHex.name}（${benHex.title}）</div></div>`;
+  let rh = `<div class="rh"><div class="lbl">本卦</div><div class="rh-big">${hexHTML(ben)}</div><div class="nm">${benHex.name}（${benHex.title}）</div></div>`;
   if (dong.length) {
-    rh += `<div class="rh"><div class="lbl">变卦</div><div class="big">${hexHTML(bian)}</div><div class="nm">${bianHex.name}（${bianHex.title}）</div></div>`;
-    rh += `<div class="rh"><div class="lbl">互卦</div><div class="big">${hexHTML(hu)}</div><div class="nm">${huHex.name}（${huHex.title}）</div></div>`;
+    rh += `<div class="rh"><div class="lbl">变卦</div><div class="rh-big">${hexHTML(bian)}</div><div class="nm">${bianHex.name}（${bianHex.title}）</div></div>`;
+    rh += `<div class="rh"><div class="lbl">互卦</div><div class="rh-big">${hexHTML(hu)}</div><div class="nm">${huHex.name}（${huHex.title}）</div></div>`;
   }
   $('#result-hex').innerHTML = rh;
 
@@ -273,15 +273,12 @@ async function doCast() {
   casting = false; $('#cast-btn').disabled = false;
 }
 
-/* ---------- 教程 ---------- */
-function renderTutorial() {
-  // 静态内容已在 HTML 中；此处留空
-}
-
 /* ---------- 初始化 ---------- */
 document.addEventListener('DOMContentLoaded', () => {
   renderHome();
   renderOverview();
+  $('#brand-link').addEventListener('click', e => { e.preventDefault(); showView('home'); });
+  $('#ge-py-toggle').addEventListener('click', togglePinyin);
   $$('nav.main a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showView(a.dataset.view); }));
   $('#detail-back').addEventListener('click', () => showView('overview'));
   // 背诵

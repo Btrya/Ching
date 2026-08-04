@@ -4,25 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>周易·习易 — 六十四卦学习与占卦</title>
-<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <header class="topbar">
-  <div class="wrap inner">
-    <a href="#" class="brand" onclick="showView('home')">周易·习易<small>六十四卦学习</small></a>
+  <div class="topbar-inner">
+    <a href="#" class="brand" id="brand-link">周易·习易<small>六十四卦学习</small></a>
     <nav class="main">
-      <a href="#" data-view="home" class="active">首页</a>
-      <a href="#" data-view="overview">六十四卦</a>
-      <a href="#" data-view="memorize">背诵</a>
-      <a href="#" data-view="divine">占卦</a>
-      <a href="#" data-view="tutorial">教程</a>
-      <a href="#" data-view="about">关于</a>
+      <a href="#" class="nav-link active" data-view="home">首页</a>
+      <a href="#" class="nav-link" data-view="overview">六十四卦</a>
+      <a href="#" class="nav-link" data-view="memorize">背诵</a>
+      <a href="#" class="nav-link" data-view="divine">占卦</a>
+      <a href="#" class="nav-link" data-view="tutorial">教程</a>
+      <a href="#" class="nav-link" data-view="about">关于</a>
     </nav>
   </div>
 </header>
 
-<main class="wrap">
+<main class="max-w-wrap mx-auto px-5">
 
   <!-- 首页 -->
   <section id="view-home" class="view active">
@@ -52,7 +51,7 @@
     <div class="ge-block">
       <div class="ge-head">
         <h2>《上下经卦名次序歌》</h2>
-        <button class="mini-btn" id="ge-py-toggle" onclick="togglePinyin()">隐藏拼音</button>
+        <button class="mini-btn" id="ge-py-toggle">隐藏拼音</button>
       </div>
       <p class="note">背下这首口诀，六十四卦的先后次序便刻在心里——这是入门第一关。红字为每字拼音，跟着念即可。</p>
       <div class="ge-lines" id="ge-content"></div>
@@ -129,7 +128,7 @@
   <section id="view-overview" class="view">
     <h2 class="section-title">六十四卦</h2>
     <p class="section-sub">点击任意一卦查看卦辞、爻辞与上下卦结构</p>
-    <div class="grid" id="overview-grid"></div>
+    <div class="grid-64" id="overview-grid"></div>
   </section>
 
   <!-- 卦详情 -->
@@ -160,7 +159,7 @@
     <div class="divine-grid">
       <div class="panel">
         <h3>起卦</h3>
-        <div style="text-align:center">
+        <div class="text-center">
           <button class="cast-btn" id="cast-btn">✦ 掷 卦 ✦</button>
         </div>
         <div class="coins" id="coins-box"></div>
@@ -173,7 +172,7 @@
       <div class="panel">
         <h3>读卦要领</h3>
         <div class="tutorial" style="box-shadow:none;background:none;padding:0">
-          <p style="color:var(--ink-soft);font-size:14px;margin-top:0">
+          <p style="color:#5b5147;font-size:14px;margin-top:0">
             每爻由三枚铜钱决定：<b>三正=老阳(○，变)</b>、<b>两正一反=少阳(—)</b>、
             <b>两反一正=少阴(– –)</b>、<b>三反=老阴(×，变)</b>。阳爻不变为阳，阴爻不变为阴；
             老阳变阴、老阴变阳，所得即「变卦」。
@@ -203,7 +202,7 @@
       <div class="tip">本站的「互动占卦」即按此法自动模拟六次抛掷并给出结果，可放心练习。</div>
 
       <h3>二、大衍之数（古法蓍草，五十根）</h3>
-      <p style="color:var(--ink-soft);font-size:15px">《系辞》云：「大衍之数五十，其用四十有九。」以 49 根蓍草起算，分二、挂一、揲四、归奇，三变成一爻，十八变成一卦。其核心规则与铜钱法一致——每爻最终归为 6 / 7 / 8 / 9 四营之一：</p>
+      <p style="color:#5b5147;font-size:15px">《系辞》云：「大衍之数五十，其用四十有九。」以 49 根蓍草起算，分二、挂一、揲四、归奇，三变成一爻，十八变成一卦。其核心规则与铜钱法一致——每爻最终归为 6 / 7 / 8 / 9 四营之一：</p>
       <ul>
         <li><b>第一变</b>：49 策分左右两堆，从右堆取 1 策挂于小指（挂一）；左右两堆各以 4 策一组数（揲四），余数（含挂一）归之（归奇），所余为 5 或 9 策</li>
         <li><b>第二、三变</b>：以所余之策再分二、揲四、归奇，余数各为 4 或 8 策</li>
@@ -241,7 +240,6 @@
   周易·习易 · 学习演示站点 · 卦辞爻辞据《周易》通行本（open-iching 整理）
 </footer>
 
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script type="module" src="/src/main.js"></script>
 </body>
 </html>
