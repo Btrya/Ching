@@ -73,6 +73,12 @@
     font-size: 12px; color: #9e2b25; letter-spacing: 0;
     font-family: -apple-system, "PingFang SC", sans-serif; font-weight: 400;
   }
+  .core-table .qx-line { @apply my-0.5; }
+  .core-table #quxiang-ge ruby { ruby-position: over; text-align: center; }
+  .core-table #quxiang-ge rt {
+    font-size: 11px; color: #9e2b25; letter-spacing: 0;
+    font-family: -apple-system, "PingFang SC", sans-serif; font-weight: 400;
+  }
 
   /* 通用区块标题 */
   .section-title { @apply font-kai text-[30px] text-ink tracking-[4px] m-0 mb-1; }
@@ -121,10 +127,18 @@
   .judge h3, .yaoci h3 { @apply m-0 mb-2.5 text-cinnabar tracking-[2px] text-xl; }
   .judge .txt { @apply text-[17px] leading-loose; }
   .yaoci { @apply mt-6; }
+  .daxiang { @apply mt-6 bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
+  .daxiang h3 { @apply m-0 mb-2.5 text-cinnabar tracking-[2px] text-xl; }
+  .daxiang .txt { @apply text-[17px] leading-loose font-kai; }
+  .tuan { @apply mt-6 bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
+  .tuan h3 { @apply m-0 mb-2.5 text-cinnabar tracking-[2px] text-xl; }
+  .tuan .txt { @apply text-[17px] leading-loose font-kai; }
   .yl { @apply flex gap-3.5 py-3 border-t border-dashed border-rule; }
   .yl:first-of-type { @apply border-t-0; }
   .yl .yn { @apply font-kai font-bold text-cinnabar min-w-[64px] text-[17px]; }
   .yl .yt { @apply text-[16px] leading-[1.9]; }
+  .yxiang { @apply mt-2 text-[14px] leading-[1.9] text-ink-soft bg-paper-3 border-l-2 border-cinnabar/40 pl-3 rounded-r; }
+  .yxiang .yx-lab { @apply inline-block mr-1.5 text-cinnabar font-kai font-bold; }
 
   /* 背诵 */
   .quiz-set { @apply flex gap-2.5 flex-wrap mb-4; }
@@ -239,6 +253,10 @@
   .book-blurb { @apply text-[14.5px] text-ink-soft leading-[1.85] m-0; }
   .book-fit {
     @apply mt-3 pt-3 border-t border-dashed border-rule text-[13px] text-cinnabar-soft;
+  }
+  .book-read {
+    @apply inline-block mt-3.5 px-3.5 py-1.5 rounded-lg border border-cinnabar text-cinnabar text-[13px]
+           no-underline transition hover:bg-cinnabar hover:text-white;
   }
 
   footer { @apply text-center text-ink-faint text-[13px] py-10 border-t border-rule mt-8; }

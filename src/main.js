@@ -1,6 +1,7 @@
 /* 周易·习易 — 交互逻辑（ES Module） */
 import './styles/main.css';
-import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN, BOOKS } from './data/hexagrams.js';
+import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN, QUXIANG_GE, BOOKS } from './data/hexagrams.js';
+import { TUAN, DAXIANG, XIAO } from './data/wing.js';
 
 /* ---------- 工具 ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -33,29 +34,39 @@ function showView(name) {
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { /* 某些环境不支持 */ }
 }
 
-/* ---------- 首页卦序歌（带拼音） ---------- */
+/* ---------- 首页卦序歌 / 取象歌（带拼音） ---------- */
 let showPinyin = true;
+function rubyWrap(text) {
+  let html = '';
+  for (const ch of text) {
+    const p = GE_PINYIN[ch];
+    if (p && showPinyin) html += `<ruby>${ch}<rt>${p}</rt></ruby>`;
+    else html += ch;
+  }
+  return html;
+}
 function renderHome() {
   renderGeSong();
+  renderQuxiangGe();
   const t = $('#ge-py-toggle');
   if (t) t.textContent = showPinyin ? '隐藏拼音' : '显示拼音';
 }
 function renderGeSong() {
   const box = $('#ge-content');
   if (!box) return;
-  box.innerHTML = GUA_XU_GE.map(line => {
-    let html = '';
-    for (const ch of line) {
-      const p = GE_PINYIN[ch];
-      if (p && showPinyin) html += `<ruby>${ch}<rt>${p}</rt></ruby>`;
-      else html += ch;
-    }
-    return `<div class="ge-line">${html}</div>`;
-  }).join('');
+  box.innerHTML = GUA_XU_GE.map(line =>
+    `<div class="ge-line">${rubyWrap(line)}</div>`).join('');
+}
+function renderQuxiangGe() {
+  const box = $('#quxiang-ge');
+  if (!box) return;
+  box.innerHTML = QUXIANG_GE.map(line =>
+    `<div class="qx-line">${rubyWrap(line)}</div>`).join('');
 }
 function togglePinyin() {
   showPinyin = !showPinyin;
   renderGeSong();
+  renderQuxiangGe();
   const t = $('#ge-py-toggle');
   if (t) t.textContent = showPinyin ? '隐藏拼音' : '显示拼音';
 }
@@ -98,6 +109,7 @@ function renderBooks() {
           <div class="book-author">${b.author} · ${b.era}</div>
           <p class="book-blurb">${b.blurb}</p>
           <div class="book-fit">适合：${b.fit}</div>
+          ${b.readUrl ? `<a class="book-read" href="${b.readUrl}" target="_blank" rel="noopener">${b.readLabel || '阅读'} ↗</a>` : ''}
         </article>`).join('')}</div>
     </div>`;
   }).join('');
@@ -107,6 +119,8 @@ function renderBooks() {
 function openDetail(id) {
   const h = HEXAGRAMS.find(x => x.id === id);
   if (!h) return;
+  const idx = h.id - 1;
+  const xiaoArr = XIAO[idx] || [];
   $('#detail-body').innerHTML = `
     <div class="detail-head">
       <div class="detail-big">${hexHTML(h.array)}</div>
@@ -124,9 +138,19 @@ function openDetail(id) {
       <h3>卦辞</h3>
       <div class="txt">${h.judgment}</div>
     </div>
+    <div class="tuan">
+      <h3>彖传</h3>
+      <div class="txt">${TUAN[idx] || ''}</div>
+      <div class="tip">《彖传》为“十翼”之一，总释一卦之卦名、卦义与卦体（上下卦之德、刚柔往来），是理解本卦主旨的总纲。</div>
+    </div>
     <div class="yaoci">
-      <h3>爻辞</h3>
-      ${h.lines.map(l => `<div class="yl"><div class="yn">${l.name}</div><div class="yt">${l.text}</div></div>`).join('')}
+      <h3>爻辞 · 小象传</h3>
+      ${h.lines.map((l, li) => `<div class="yl"><div class="yn">${l.name}</div><div class="yt">${l.text}</div>${xiaoArr[li] ? `<div class="yxiang"><span class="yx-lab">象</span>${xiaoArr[li]}</div>` : ''}</div>`).join('')}
+    </div>
+    <div class="daxiang">
+      <h3>大象传</h3>
+      <div class="txt">${DAXIANG[idx] || ''}</div>
+      <div class="tip">《大象传》为“十翼”之一，由上下卦象推演君子修身、处世、治国之道，是《易经》最朗朗上口、也最具启发性的部分。</div>
     </div>`;
   showView('detail');
 }
