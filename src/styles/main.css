@@ -130,6 +130,12 @@
   .daxiang { @apply mt-6 bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
   .daxiang h3 { @apply m-0 mb-2.5 text-cinnabar tracking-[2px] text-xl; }
   .daxiang .txt { @apply text-[17px] leading-loose font-kai; }
+  .daxiang .baihua {
+    @apply mt-3.5 pl-4 border-l-2 border-gold text-[15px] leading-[1.95] font-song text-ink-soft;
+  }
+  .daxiang .bh-lab {
+    @apply inline-block mr-2 px-1.5 py-0.5 rounded bg-gold/15 text-gold text-[12px] align-middle tracking-normal;
+  }
   .tuan { @apply mt-6 bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
   .tuan h3 { @apply m-0 mb-2.5 text-cinnabar tracking-[2px] text-xl; }
   .tuan .txt { @apply text-[17px] leading-loose font-kai; }

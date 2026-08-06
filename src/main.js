@@ -2,7 +2,7 @@
 import './styles/main.css';
 import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN, QUXIANG_GE, BOOKS } from './data/hexagrams.js';
 import { BOOKS_TEXT } from './data/books_text.js';
-import { TUAN, DAXIANG, XIAO } from './data/wing.js';
+import { TUAN, DAXIANG, DAXIANG_BAIHUA, XIAO } from './data/wing.js';
 
 /* ---------- 工具 ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -213,6 +213,7 @@ function openDetail(id) {
     <div class="daxiang">
       <h3>大象传</h3>
       <div class="txt">${DAXIANG[idx] || ''}</div>
+      <div class="baihua"><span class="bh-lab">白话</span>${DAXIANG_BAIHUA[idx] || ''}</div>
       <div class="tip">《大象传》为“十翼”之一，由上下卦象推演君子修身、处世、治国之道，是《易经》最朗朗上口、也最具启发性的部分。</div>
     </div>`;
   showView('detail');
