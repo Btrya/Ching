@@ -129,6 +129,15 @@
   <section id="view-overview" class="view">
     <h2 class="section-title">六十四卦</h2>
     <p class="section-sub">点击任意一卦查看卦辞、爻辞与上下卦结构</p>
+    <div class="ov-tools">
+      <input id="ov-search" class="ov-search" type="search" placeholder="搜索卦名 / 序号 / 关键字" aria-label="搜索卦">
+      <div class="ov-jing" id="ov-jing">
+        <button class="chip on" data-jing="all">全部</button>
+        <button class="chip" data-jing="上">上经</button>
+        <button class="chip" data-jing="下">下经</button>
+      </div>
+      <div class="ov-palace" id="ov-palace"></div>
+    </div>
     <div class="grid-64" id="overview-grid"></div>
   </section>
 
@@ -147,8 +156,9 @@
       <button data-mode="see-name">看卦名 · 选卦象</button>
       <button data-mode="type-name">看卦象 · 写卦名</button>
       <button data-mode="type-seq">看卦名 · 写卦序</button>
+      <button data-mode="weak">弱项复习</button>
     </div>
-    <div class="scorebar">已答对 <b id="quiz-score">0</b> / 共 <span id="quiz-total">0</span> 题</div>
+    <div class="scorebar">已答对 <b id="quiz-score">0</b> / 共 <span id="quiz-total">0</span> 题 · 已掌握 <b id="quiz-mastered">0</b>/64</div>
     <div class="qcard" id="quiz-card"></div>
     <div class="feedback" id="quiz-feedback"></div>
   </section>
@@ -156,7 +166,11 @@
   <!-- 占卦 -->
   <section id="view-divine" class="view">
     <h2 class="section-title">互动占卦</h2>
-    <p class="section-sub">心有所疑，静心凝神，点击下方按钮起卦（三枚铜钱法）</p>
+    <p class="section-sub">心有所疑，静心凝神，选择起卦之法（三枚铜钱或古法蓍草）</p>
+    <div class="cast-methods">
+      <button class="cm-btn on" data-method="coin">三枚铜钱法</button>
+      <button class="cm-btn" data-method="dayan">大衍之数（蓍草）</button>
+    </div>
     <div class="divine-grid">
       <div class="panel">
         <h3>起卦</h3>
@@ -168,6 +182,9 @@
         <div id="result-box" style="display:none">
           <h3 style="margin-top:18px">断语</h3>
           <div id="result-duan"></div>
+          <div class="result-actions">
+            <button class="ghost-btn" id="result-detail">看本卦详解 →</button>
+          </div>
         </div>
       </div>
       <div class="panel">
@@ -182,6 +199,13 @@
             无动爻则直读本卦卦辞。变卦表示事态发展所「之」的方向。</div>
         </div>
       </div>
+    </div>
+    <div class="cast-history" id="cast-history-box">
+      <div class="ch-head">
+        <h3>占卦记录</h3>
+        <button class="ghost-btn" id="clear-casts">清空</button>
+      </div>
+      <div class="ch-list" id="cast-list"></div>
     </div>
   </section>
 

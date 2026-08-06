@@ -3,6 +3,11 @@ import './styles/main.css';
 import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN, QUXIANG_GE, BOOKS } from './data/hexagrams.js';
 import { BOOKS_TEXT } from './data/books_text.js';
 import { TUAN, DAXIANG, DAXIANG_BAIHUA, XIAO } from './data/wing.js';
+import {
+  getFavorites, isFavorite, toggleFavorite, getNote, setNote,
+  recordQuiz, quizMastered, weakList, getCasts, addCast, clearCasts
+} from './store.js';
+import { PALACE_BY_ID, JING_BY_ID, PALACES } from './data/meta.js';
 
 /* ---------- 工具 ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -72,18 +77,38 @@ function togglePinyin() {
   if (t) t.textContent = showPinyin ? '隐藏拼音' : '显示拼音';
 }
 
-/* ---------- 六十四卦总览 ---------- */
+/* ---------- 六十四卦总览（支持搜索 / 上下经 / 八宫筛选） ---------- */
+let ovState = { q: '', jing: 'all', palace: 'all' };
+function favIds() { try { return getFavorites(); } catch (e) { return []; } }
 function renderOverview() {
+  const q = ovState.q.trim().toLowerCase();
   const grid = $('#overview-grid');
-  grid.innerHTML = HEXAGRAMS.map(h =>
+  const favs = favIds();
+  const list = HEXAGRAMS.filter(h => {
+    if (ovState.jing !== 'all' && JING_BY_ID[h.id] !== ovState.jing) return false;
+    if (ovState.palace !== 'all' && PALACE_BY_ID[h.id] !== ovState.palace) return false;
+    if (q) {
+      const hay = (h.name + h.title + h.judgment + String(h.id) + (PALACE_BY_ID[h.id] || '')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  grid.innerHTML = list.map(h =>
     `<div class="card" data-id="${h.id}">
-       <div class="seq">${String(h.id).padStart(2, '0')}</div>
+       <div class="seq">${String(h.id).padStart(2, '0')}${favs.includes(h.id) ? '<span class="star">★</span>' : ''}</div>
        ${hexHTML(h.array, true)}
        <div class="nm">${h.name}</div>
        <div class="tt">${h.title}</div>
      </div>`).join('');
   $$('#overview-grid .card').forEach(c =>
     c.addEventListener('click', () => openDetail(+c.dataset.id)));
+}
+function renderPalaceChips() {
+  const box = $('#ov-palace');
+  if (!box) return;
+  const chips = ['all', ...PALACES];
+  box.innerHTML = chips.map(p =>
+    `<button class="chip ${p === 'all' ? 'on' : ''}" data-palace="${p}">${p === 'all' ? '全部' : p + '宫'}</button>`).join('');
 }
 
 /* ---------- 推荐书单 ---------- */
@@ -184,7 +209,11 @@ function openDetail(id) {
   if (!h) return;
   const idx = h.id - 1;
   const xiaoArr = XIAO[idx] || [];
+  const fav = isFavorite(h.id);
   $('#detail-body').innerHTML = `
+    <div class="detail-tools">
+      <button class="fav-btn ${fav ? 'on' : ''}" id="fav-btn">${fav ? '★ 已收藏' : '☆ 收藏'}</button>
+    </div>
     <div class="detail-head">
       <div class="detail-big">${hexHTML(h.array)}</div>
       <div class="detail-meta">
@@ -215,7 +244,23 @@ function openDetail(id) {
       <div class="txt">${DAXIANG[idx] || ''}</div>
       <div class="baihua"><span class="bh-lab">白话</span>${DAXIANG_BAIHUA[idx] || ''}</div>
       <div class="tip">《大象传》为“十翼”之一，由上下卦象推演君子修身、处世、治国之道，是《易经》最朗朗上口、也最具启发性的部分。</div>
+    </div>
+    <div class="note-box">
+      <h3>我的笔记</h3>
+      <textarea id="note-area" placeholder="写下你对这一卦的体会，仅保存在本机浏览器…">${escapeHtml(getNote(h.id))}</textarea>
+      <div class="note-tip">笔记仅保存在你的本机浏览器</div>
     </div>`;
+  // 收藏
+  const fb = $('#fav-btn');
+  if (fb) fb.onclick = () => {
+    const on = toggleFavorite(h.id);
+    fb.classList.toggle('on', on);
+    fb.textContent = on ? '★ 已收藏' : '☆ 收藏';
+    renderOverview(); // 刷新总览星标
+  };
+  // 笔记
+  const na = $('#note-area');
+  if (na) na.addEventListener('input', () => setNote(h.id, na.value));
   showView('detail');
 }
 
@@ -227,11 +272,22 @@ function startQuiz(mode) {
   nextQuestion();
 }
 function nextQuestion() {
-  quiz.answered = false; quiz.cur = sample(HEXAGRAMS, 1)[0];
+  quiz.answered = false;
   const q = $('#quiz-card'), fb = $('#quiz-feedback');
   fb.textContent = ''; fb.className = 'feedback';
-  const h = quiz.cur;
-  if (quiz.mode === 'see-diagram') {
+  let h;
+  if (quiz.mode === 'weak') {
+    const weak = weakList();
+    if (!weak.length) {
+      q.innerHTML = '<div class="qhint">🎉 暂无薄弱卦——你还没答错，或先去其他模式练练。</div>';
+      quiz.answered = true; quiz.cur = null; updateScore(); return;
+    }
+    h = sample(HEXAGRAMS.filter(x => weak.includes(x.id)), 1)[0];
+  } else {
+    h = sample(HEXAGRAMS, 1)[0];
+  }
+  quiz.cur = h;
+  if (quiz.mode === 'see-diagram' || quiz.mode === 'weak') {
     const opts = sample(HEXAGRAMS.filter(x => x.id !== h.id), 3).concat(h);
     const sh = sample(opts, 4);
     q.innerHTML = `<div class="qhint">看卦象，选出正确的卦名</div>
@@ -296,6 +352,7 @@ function bindChoices(q, h) {
 function resolveAnswer(ok, msg) {
   quiz.answered = true; quiz.total++;
   if (ok) quiz.score++;
+  if (quiz.cur) recordQuiz(quiz.cur.id, ok);
   const fb = $('#quiz-feedback');
   fb.textContent = (ok ? '✓ 答对了！' : '✗ ' + msg);
   fb.className = 'feedback ' + (ok ? 'ok' : 'no');
@@ -311,10 +368,12 @@ function resolveAnswer(ok, msg) {
 function updateScore() {
   $('#quiz-score').textContent = quiz.score;
   $('#quiz-total').textContent = quiz.total;
+  const m = $('#quiz-mastered');
+  if (m) m.textContent = quizMastered();
 }
 
 /* ---------- 占卦 ---------- */
-let casting = false;
+let casting = false, currentMethod = 'coin', currentBenId = null;
 function castLine() {
   // 三枚铜钱：正(字)=1, 反(背)=0
   const coins = [randInt(2), randInt(2), randInt(2)];
@@ -322,11 +381,25 @@ function castLine() {
   const val = heads === 3 ? 9 : heads === 2 ? 7 : heads === 1 ? 8 : 6; // 9老阳 7少阳 8少阴 6老阴
   return { coins, val };
 }
-async function doCast() {
+/* 大衍之数（蓍草 49 策，三变成一爻）：每变分二、揲四、归奇，最终归为 6/7/8/9 */
+function dayanLine() {
+  let count = 49;
+  for (let i = 0; i < 3; i++) {
+    const left = Math.floor(Math.random() * (count - 1)) + 1;
+    const right = count - left;
+    const r1 = left % 4 || 4;
+    const r2 = (right - (i === 0 ? 1 : 0)) % 4 || 4;
+    count -= (r1 + r2 + (i === 0 ? 1 : 0));
+  }
+  return count / 4; // 6 老阴 / 7 少阳 / 8 少阴 / 9 老阳
+}
+async function doCast(method) {
   if (casting) return; casting = true;
+  currentMethod = method || 'coin';
   $('#cast-btn').disabled = true;
+  const isDayan = currentMethod === 'dayan';
   const lines = [];
-  for (let i = 0; i < 6; i++) lines.push(castLine());
+  for (let i = 0; i < 6; i++) lines.push(isDayan ? { val: dayanLine() } : castLine());
   // 渲染硬币（逐爻揭示）
   const coinsBox = $('#coins-box');
   coinsBox.innerHTML = '';
@@ -339,18 +412,26 @@ async function doCast() {
     row.appendChild(lbl);
     const cs = document.createElement('span');
     cs.style.cssText = 'display:flex;gap:8px;';
-    lines[i].coins.forEach(c => {
+    if (isDayan) {
       const s = document.createElement('span');
-      s.className = 'coin flip';
-      s.textContent = c ? '正' : '反';
-      s.style.cssText = 'display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;border:1px solid #b08d57;' +
-        (c ? 'background:#f7e9c9;color:#9e2b25;' : 'background:#f4ecd8;color:#5b5147;');
+      s.textContent = lines[i].val === 9 ? '老阳 ○' : lines[i].val === 7 ? '少阳 —' : lines[i].val === 8 ? '少阴 – –' : '老阴 ×';
+      s.style.cssText = 'color:#5b5147;font-size:15px;';
       cs.appendChild(s);
-    });
-    const v = document.createElement('span');
-    v.style.cssText = 'color:#5b5147;width:40px;font-size:13px;';
-    v.textContent = lines[i].val === 9 ? '老阳○' : lines[i].val === 7 ? '少阳—' : lines[i].val === 8 ? '少阴--' : '老阴×';
-    row.appendChild(cs); row.appendChild(v);
+    } else {
+      lines[i].coins.forEach(c => {
+        const s = document.createElement('span');
+        s.className = 'coin flip';
+        s.textContent = c ? '正' : '反';
+        s.style.cssText = 'display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;border:1px solid #b08d57;' +
+          (c ? 'background:#f7e9c9;color:#9e2b25;' : 'background:#f4ecd8;color:#5b5147;');
+        cs.appendChild(s);
+      });
+      const v = document.createElement('span');
+      v.style.cssText = 'color:#5b5147;width:40px;font-size:13px;';
+      v.textContent = lines[i].val === 9 ? '老阳○' : lines[i].val === 7 ? '少阳—' : lines[i].val === 8 ? '少阴--' : '老阴×';
+      cs.appendChild(v);
+    }
+    row.appendChild(cs);
     coinsBox.appendChild(row);
     await new Promise(r => setTimeout(r, 180));
   }
@@ -387,7 +468,41 @@ async function doCast() {
   }
   $('#result-duan').innerHTML = duan;
   $('#result-box').style.display = 'block';
+  currentBenId = benHex.id;
+  addCast({
+    ts: Date.now(),
+    method: currentMethod,
+    benId: benHex.id, benName: benHex.name, benTitle: benHex.title,
+    bianId: bianHex.id, bianName: bianHex.name,
+    dong: dong.map(i => '初二三四五上'[i])
+  });
+  renderCastList();
   casting = false; $('#cast-btn').disabled = false;
+}
+
+/* ---------- 占卦记录列表 ---------- */
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getMonth() + 1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function renderCastList() {
+  const box = $('#cast-list');
+  if (!box) return;
+  const list = getCasts();
+  if (!list.length) { box.innerHTML = '<div class="ch-empty">还没有占卦记录，掷一卦试试。</div>'; return; }
+  box.innerHTML = list.map(r => `
+    <div class="ch-item" data-ben="${r.benId}">
+      <div class="ch-main">
+        <span class="ch-name">${escapeHtml(r.benName)}（${escapeHtml(r.benTitle)}）</span>
+        ${r.bianId !== r.benId ? `<span class="ch-arrow">→</span><span class="ch-name">${escapeHtml(r.bianName)}</span>` : ''}
+      </div>
+      <div class="ch-meta">
+        <span class="ch-method">${r.method === 'dayan' ? '大衍' : '铜钱'}</span>
+        ${r.dong && r.dong.length ? `<span class="ch-dong">动：${r.dong.join('、')}</span>` : '<span class="ch-dong">静卦</span>'}
+        <span class="ch-time">${fmtTime(r.ts)}</span>
+      </div>
+    </div>`).join('');
 }
 
 /* ---------- 初始化 ---------- */
@@ -395,14 +510,40 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHome();
   renderOverview();
   renderBooks();
+  renderPalaceChips();
   $('#brand-link').addEventListener('click', e => { e.preventDefault(); showView('home'); });
   $('#ge-py-toggle').addEventListener('click', togglePinyin);
   $$('nav.main a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showView(a.dataset.view); }));
   $('#detail-back').addEventListener('click', () => showView('overview'));
+  // 总览搜索 / 筛选
+  $('#ov-search').addEventListener('input', e => { ovState.q = e.target.value; renderOverview(); });
+  $('#ov-jing').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    ovState.jing = b.dataset.jing;
+    $$('#ov-jing .chip').forEach(c => c.classList.toggle('on', c === b));
+    renderOverview();
+  });
+  $('#ov-palace').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    ovState.palace = b.dataset.palace;
+    $$('#ov-palace .chip').forEach(c => c.classList.toggle('on', c === b));
+    renderOverview();
+  });
   // 背诵
   $$('.quiz-set button').forEach(b => b.addEventListener('click', () => startQuiz(b.dataset.mode)));
   startQuiz('see-diagram');
   // 占卦
-  $('#cast-btn').addEventListener('click', doCast);
+  $$('.cm-btn').forEach(b => b.addEventListener('click', () => {
+    $$('.cm-btn').forEach(x => x.classList.toggle('on', x === b));
+    currentMethod = b.dataset.method;
+  }));
+  $('#cast-btn').addEventListener('click', () => doCast(currentMethod));
+  $('#result-detail').addEventListener('click', () => { if (currentBenId) openDetail(currentBenId); });
+  $('#clear-casts').addEventListener('click', () => { clearCasts(); renderCastList(); });
+  renderCastList();
+  document.addEventListener('click', e => {
+    const it = e.target.closest('.ch-item');
+    if (it) openDetail(+it.dataset.ben);
+  });
   showView('home');
 });

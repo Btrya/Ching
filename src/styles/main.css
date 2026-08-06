@@ -302,6 +302,64 @@
   }
   .reader-foot { @apply px-5 py-2 border-t border-rule bg-paper-2 text-[12px] text-ink-faint text-center; }
 
+  /* 总览：搜索 / 筛选 */
+  .ov-tools { @apply flex flex-col gap-3 mb-5 sm:flex-row sm:items-center sm:flex-wrap; }
+  .ov-search {
+    @apply w-full max-w-[420px] font-song text-[15px] px-4 py-2.5 rounded-xl border border-rule bg-paper text-ink;
+  }
+  .ov-jing { @apply sm:ml-auto flex gap-2 flex-wrap; }
+  .ov-palace { @apply flex gap-2 flex-wrap; }
+  .chip {
+    @apply bg-paper-2 border border-rule text-ink-soft font-song text-[13px] px-3 py-1.5 rounded-full cursor-pointer transition whitespace-nowrap;
+  }
+  .chip:hover { @apply border-cinnabar text-cinnabar; }
+  .chip.on { @apply bg-cinnabar text-white border-cinnabar; }
+  .card .star { @apply ml-1 text-[12px] text-gold; }
+
+  /* 详情：收藏 / 笔记 */
+  .detail-tools { @apply flex justify-end mb-3; }
+  .fav-btn {
+    @apply bg-paper-2 border border-rule text-ink-soft font-song text-[14px] px-4 py-1.5 rounded-full cursor-pointer transition;
+  }
+  .fav-btn.on { @apply bg-gold/15 border-gold text-gold; }
+  .fav-btn:hover { @apply border-gold; }
+  .note-box { @apply mt-6 bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
+  .note-box h3 { @apply m-0 mb-2.5 text-cinnabar tracking-[2px] text-xl; }
+  .note-box textarea {
+    @apply w-full min-h-[120px] font-song text-[15px] leading-[1.8] text-ink p-4 rounded-xl border border-rule bg-paper resize-y;
+  }
+  .note-box textarea:focus { @apply outline-none border-cinnabar; }
+  .note-tip { @apply mt-2 text-ink-faint text-[12px]; }
+
+  /* 占卦：方法切换 / 记录 */
+  .cast-methods { @apply flex gap-2.5 flex-wrap mb-4; }
+  .cm-btn {
+    @apply bg-paper-2 border border-rule text-ink-soft py-2 px-4 rounded-lg cursor-pointer font-song text-[14px];
+  }
+  .cm-btn.on { @apply bg-cinnabar text-white border-cinnabar; }
+  .cm-btn:hover { @apply border-cinnabar; }
+  .result-actions { @apply mt-4; }
+  .ghost-btn {
+    @apply inline-block bg-paper-2 text-ink-soft border border-rule py-2 px-5 rounded-lg cursor-pointer font-song text-[14px] transition;
+  }
+  .ghost-btn:hover { @apply text-cinnabar border-cinnabar; }
+  .cast-history { @apply mt-8 bg-paper-2 border border-rule rounded-2xl p-6 shadow-soft; }
+  .ch-head { @apply flex items-center justify-between mb-3; }
+  .ch-head h3 { @apply m-0 font-kai text-[20px] text-ink tracking-[3px]; }
+  .ch-list { @apply flex flex-col gap-2; }
+  .ch-item {
+    @apply bg-paper border border-rule rounded-xl px-4 py-3 cursor-pointer transition;
+  }
+  .ch-item:hover { @apply border-cinnabar bg-paper-3; }
+  .ch-main { @apply flex items-center gap-2 flex-wrap; }
+  .ch-name { @apply font-kai text-[17px] text-ink; }
+  .ch-arrow { @apply text-cinnabar text-[15px]; }
+  .ch-meta { @apply flex gap-3 flex-wrap mt-1 text-[13px] text-ink-soft; }
+  .ch-method { @apply px-2 py-0.5 rounded-full bg-cinnabar/10 text-cinnabar; }
+  .ch-dong { @apply text-ink-faint; }
+  .ch-time { @apply ml-auto text-ink-faint; }
+  .ch-empty { @apply text-ink-faint text-[14px] text-center py-4; }
+
   footer { @apply text-center text-ink-faint text-[13px] py-10 border-t border-rule mt-8; }
 }
 
