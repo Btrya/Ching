@@ -1,6 +1,6 @@
 /* 周易·习易 — 交互逻辑（ES Module） */
 import './styles/main.css';
-import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN } from './data/hexagrams.js';
+import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN, BOOKS } from './data/hexagrams.js';
 
 /* ---------- 工具 ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -72,6 +72,35 @@ function renderOverview() {
      </div>`).join('');
   $$('#overview-grid .card').forEach(c =>
     c.addEventListener('click', () => openDetail(+c.dataset.id)));
+}
+
+/* ---------- 推荐书单 ---------- */
+function renderBooks() {
+  const wrap = $('#books-body');
+  if (!wrap) return;
+  const cats = ['基础义理', '占卜流派', '命理进阶'];
+  const catTip = {
+    '基础义理': '先懂《易经》在讲什么、怎么占怎么解',
+    '占卜流派': '梅花易数、六爻纳甲，动手起卦断卦',
+    '命理进阶': '八字子平，需先通干支，宜后学'
+  };
+  wrap.innerHTML = cats.map(cat => {
+    const list = BOOKS.filter(b => b.cat === cat);
+    if (!list.length) return '';
+    return `<div class="book-cat">
+      <h3 class="book-cat-title">${cat}<span class="book-cat-tip">${catTip[cat]}</span></h3>
+      <div class="book-grid">${list.map(b => `
+        <article class="book-card">
+          <div class="book-top">
+            <div class="book-title">${b.title}</div>
+            <span class="book-level ${b.level === '入门' ? 'lv-ru' : 'lv-jin'}">${b.level}</span>
+          </div>
+          <div class="book-author">${b.author} · ${b.era}</div>
+          <p class="book-blurb">${b.blurb}</p>
+          <div class="book-fit">适合：${b.fit}</div>
+        </article>`).join('')}</div>
+    </div>`;
+  }).join('');
 }
 
 /* ---------- 卦详情 ---------- */
@@ -277,6 +306,7 @@ async function doCast() {
 document.addEventListener('DOMContentLoaded', () => {
   renderHome();
   renderOverview();
+  renderBooks();
   $('#brand-link').addEventListener('click', e => { e.preventDefault(); showView('home'); });
   $('#ge-py-toggle').addEventListener('click', togglePinyin);
   $$('nav.main a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); showView(a.dataset.view); }));

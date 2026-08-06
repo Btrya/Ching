@@ -218,6 +218,29 @@
     @apply bg-paper-3 border border-rule rounded-xl p-4 text-ink-soft text-[14px] mt-4;
   }
 
+  /* 推荐书单 */
+  .book-cat { @apply mt-9; }
+  .book-cat-title {
+    @apply font-kai text-[22px] text-ink tracking-[3px] m-0 mb-3.5;
+    border-left: 4px solid #9e2b25; padding-left: 12px;
+  }
+  .book-cat-tip { @apply font-song text-[13px] text-ink-faint tracking-normal ml-3 align-middle; }
+  .book-grid { @apply grid grid-cols-1 lg:grid-cols-2 gap-[18px]; }
+  .book-card { @apply bg-paper-2 border border-rule rounded-xl p-5 shadow-soft transition; }
+  .book-card:hover { @apply -translate-y-0.5 border-cinnabar shadow-[0_6px_16px_rgba(43,38,32,0.18)]; }
+  .book-top { @apply flex items-start justify-between gap-3; }
+  .book-title { @apply font-kai text-[21px] text-ink tracking-wide; }
+  .book-level {
+    @apply font-song text-[12px] px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 mt-1;
+  }
+  .book-level.lv-ru { @apply bg-[#dfe9d4] text-[#3c5a22] border border-[#7a9a52]; }
+  .book-level.lv-jin { @apply bg-[#f0e2c8] text-[#8a6322] border border-[#c9a75a]; }
+  .book-author { @apply text-[13px] text-ink-soft mt-1.5 mb-2.5; }
+  .book-blurb { @apply text-[14.5px] text-ink-soft leading-[1.85] m-0; }
+  .book-fit {
+    @apply mt-3 pt-3 border-t border-dashed border-rule text-[13px] text-cinnabar-soft;
+  }
+
   footer { @apply text-center text-ink-faint text-[13px] py-10 border-t border-rule mt-8; }
 }
 
