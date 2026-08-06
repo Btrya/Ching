@@ -3331,6 +3331,7 @@ const BOOKS = [
     title: "梅花易数", author: "邵雍（北宋）", era: "宋代", cat: "占卜流派", level: "入门",
     blurb: "相传为邵雍（康节）所创，以“数”起卦、以“体用”生克断事。不需铜钱蓍草，时间、数字、声音、所见之物皆可起卦，是易占里起卦最简、上手最快的一门，最宜日常占问。",
     fit: "想学灵活、随时可起的占法的人",
+    inSite: true,
     readLabel: "免费全文（维基文库）",
     readUrl: "https://zh.wikisource.org/wiki/梅花易數"
   },
@@ -3338,6 +3339,7 @@ const BOOKS = [
     title: "增删卜易", author: "野鹤老人（清）", era: "清代", cat: "占卜流派", level: "进阶",
     blurb: "六爻纳甲（装干支、配六亲六神）的集大成之作，断卦体系完备、案例丰富，是学习六爻断卦不可绕开的经典。与“互动占卦”所用的铜钱法一脉相承，宜在熟悉起卦后深入。",
     fit: "想精研六爻断卦的人",
+    inSite: true,
     readLabel: "免费全文（维基文库）",
     readUrl: "https://zh.wikisource.org/wiki/增刪卜易"
   },
@@ -3352,8 +3354,8 @@ const BOOKS = [
     title: "滴天髓", author: "京图 原著 / 任铁樵 注", era: "清（任铁樵注本）", cat: "命理进阶", level: "进阶",
     blurb: "传统子平八字的理论巅峰，被誉为命理界“圣经”。以极简口诀讲透阴阳、五行、十干、格局、旺衰、用神。原文精炼如口诀，任铁樵的注释本通俗且案例极多，看完八字水平大进。需先懂天干地支。",
     fit: "已懂干支、想深入八字命理的人",
-    readLabel: "免费全文（维基文库）",
-    readUrl: "https://zh.wikisource.org/wiki/滴天髓"
+    readLabel: "购买 / 阅读（豆瓣）",
+    readUrl: "https://search.douban.com/book/subject_search?search_text=滴天髓"
   }
 ];
 

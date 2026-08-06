@@ -256,10 +256,54 @@
   }
   .book-read {
     @apply inline-block mt-3.5 px-3.5 py-1.5 rounded-lg border border-cinnabar text-cinnabar text-[13px]
-           no-underline transition hover:bg-cinnabar hover:text-white;
+           no-underline transition hover:bg-cinnabar hover:text-white cursor-pointer bg-transparent;
+    font-family: inherit;
   }
+  .book-read.in-site { @apply border-cinnabar-soft text-cinnabar; }
+
+  /* 站内阅读器 */
+  .reader-overlay { @apply fixed inset-0 z-[60] flex items-stretch justify-center bg-[rgba(28,22,16,0.55)]; }
+  .reader-overlay[hidden] { display: none; }
+  body.reader-open { overflow: hidden; }
+  .reader-panel {
+    @apply w-[min(1000px,96vw)] h-[94vh] my-auto bg-paper border border-rule rounded-2xl overflow-hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  }
+  .reader-head { @apply flex items-center justify-between gap-3 px-5 py-3 border-b border-rule bg-paper-2; }
+  .reader-meta { @apply flex items-baseline gap-3 min-w-0; }
+  .reader-title { @apply font-kai text-[20px] text-ink tracking-wide truncate; }
+  .reader-author { @apply font-song text-[13px] text-ink-faint shrink-0; }
+  .reader-tools { @apply flex items-center gap-2 shrink-0; }
+  .reader-jump { @apply font-song text-[14px] px-2 py-1 rounded-md border border-rule bg-paper text-ink; display: none; }
+  .reader-close {
+    @apply w-8 h-8 grid place-items-center rounded-md border border-rule text-ink-soft transition cursor-pointer;
+  }
+  .reader-close:hover { @apply bg-cinnabar text-white border-cinnabar; }
+  .reader-body { @apply flex min-h-0 flex-1; }
+  .reader-toc { @apply w-[220px] shrink-0 border-r border-rule overflow-auto bg-paper-2/40 p-3; }
+  .reader-toc-h { @apply font-kai text-[15px] text-cinnabar tracking-[2px] mb-2; }
+  .reader-toc ul { @apply list-none m-0 p-0; }
+  .toc-item {
+    @apply block w-full text-left font-song text-[14px] text-ink-soft px-2.5 py-1.5 rounded-md transition;
+    background: transparent; border: none; cursor: pointer;
+  }
+  .toc-item:hover { @apply bg-[#efe6cf] text-ink; }
+  .toc-item.active { @apply bg-cinnabar text-white; }
+  .reader-content {
+    @apply flex-1 overflow-auto px-7 py-6 font-kai text-[18px] leading-[2] text-ink;
+    white-space: pre-wrap;
+  }
+  .reader-foot { @apply px-5 py-2 border-t border-rule bg-paper-2 text-[12px] text-ink-faint text-center; }
 
   footer { @apply text-center text-ink-faint text-[13px] py-10 border-t border-rule mt-8; }
+}
+
+@media (max-width: 720px) {
+  .reader-jump { display: block; }
+  .reader-toc { display: none; }
+  .reader-content { @apply px-5 py-5 text-[17px]; }
+  .reader-panel { @apply h-[96vh] w-[98vw] rounded-xl; }
 }
 
 /* ---------- 移动端微调（窄屏 hex / 卦序歌 / 导航） ---------- */

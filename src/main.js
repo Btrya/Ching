@@ -1,6 +1,7 @@
 /* 周易·习易 — 交互逻辑（ES Module） */
 import './styles/main.css';
 import { HEXAGRAMS, GUA_XU_GE, GE_PINYIN, QUXIANG_GE, BOOKS } from './data/hexagrams.js';
+import { BOOKS_TEXT } from './data/books_text.js';
 import { TUAN, DAXIANG, XIAO } from './data/wing.js';
 
 /* ---------- 工具 ---------- */
@@ -109,11 +110,73 @@ function renderBooks() {
           <div class="book-author">${b.author} · ${b.era}</div>
           <p class="book-blurb">${b.blurb}</p>
           <div class="book-fit">适合：${b.fit}</div>
-          ${b.readUrl ? `<a class="book-read" href="${b.readUrl}" target="_blank" rel="noopener">${b.readLabel || '阅读'} ↗</a>` : ''}
+          ${b.inSite
+            ? `<button class="book-read in-site" data-textkey="${b.title}">阅读（站内）↺</button>`
+            : (b.readUrl ? `<a class="book-read" href="${b.readUrl}" target="_blank" rel="noopener">${b.readLabel || '阅读'} ↗</a>` : '')}
         </article>`).join('')}</div>
     </div>`;
   }).join('');
 }
+
+/* ---------- 站内阅读器 ---------- */
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+let readerCur = 0;
+function openReader(key) {
+  const book = BOOKS_TEXT[key];
+  if (!book) return;
+  readerCur = 0;
+  const ov = $('#reader-overlay');
+  const toc = book.chapters.map((c, i) =>
+    `<li><button class="toc-item" data-i="${i}">${escapeHtml(c.title)}</button></li>`).join('');
+  const opts = book.chapters.map((c, i) =>
+    `<option value="${i}">${escapeHtml(c.title)}</option>`).join('');
+  ov.innerHTML = `<div class="reader-panel">
+    <div class="reader-head">
+      <div class="reader-meta">
+        <span class="reader-title">${escapeHtml(book.title)}</span>
+        <span class="reader-author">${escapeHtml(book.author || '')}</span>
+      </div>
+      <div class="reader-tools">
+        <select class="reader-jump" aria-label="选择章节">${opts}</select>
+        <button class="reader-close" aria-label="关闭阅读器">✕</button>
+      </div>
+    </div>
+    <div class="reader-body">
+      <nav class="reader-toc"><div class="reader-toc-h">目录</div><ul>${toc}</ul></nav>
+      <article class="reader-content"></article>
+    </div>
+    <div class="reader-foot">原文为繁体（数据源：维基文库），仅供学习研究</div>
+  </div>`;
+  const content = ov.querySelector('.reader-content');
+  const paint = () => {
+    content.textContent = book.chapters[readerCur].text;
+    content.scrollTop = 0;
+    ov.querySelectorAll('.toc-item').forEach(b => b.classList.toggle('active', +b.dataset.i === readerCur));
+    ov.querySelector('.reader-jump').value = String(readerCur);
+  };
+  ov.querySelector('.reader-close').onclick = closeReader;
+  ov.querySelectorAll('.toc-item').forEach(b => b.onclick = () => { readerCur = +b.dataset.i; paint(); });
+  ov.querySelector('.reader-jump').onchange = e => { readerCur = +e.target.value; paint(); };
+  ov.onclick = e => { if (e.target === ov) closeReader(); };
+  paint();
+  ov.hidden = false;
+  document.body.classList.add('reader-open');
+}
+function closeReader() {
+  const ov = $('#reader-overlay');
+  ov.hidden = true;
+  ov.innerHTML = '';
+  document.body.classList.remove('reader-open');
+}
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.book-read[data-textkey]');
+  if (btn) { e.preventDefault(); openReader(btn.dataset.textkey); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { const ov = $('#reader-overlay'); if (ov && !ov.hidden) closeReader(); }
+});
 
 /* ---------- 卦详情 ---------- */
 function openDetail(id) {
